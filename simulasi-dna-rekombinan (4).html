@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="id"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Simulasi Teknik DNA Rekombinan</title>
+<style>
+*{box-sizing:border-box}h1,p{margin:0}button{font-family:inherit}svg{display:block}
+.flex{display:flex}.items-center{align-items:center}.justify-between{justify-content:space-between}.justify-center{justify-content:center}.gap-1{gap:.25rem}.gap-2{gap:.5rem}.font-extrabold{font-weight:800}.font-bold{font-weight:700}.font-semibold{font-weight:600}.px-2{padding-left:.5rem;padding-right:.5rem}.pt-2{padding-top:.5rem}.py-1{padding-top:.25rem;padding-bottom:.25rem}.p-2{padding:.5rem}.mt-1{margin-top:.25rem}.mx-2{margin-left:.5rem;margin-right:.5rem}.my-2{margin:.5rem 0}.my-3{margin:.75rem 0}.mb-3{margin-bottom:.75rem}.min-w-0{min-width:0}.text-xs{font-size:.75rem}.text-sm{font-size:.875rem}.text-lg{font-size:1.125rem}.text-xl{font-size:1.25rem}.leading-tight{line-height:1.2}.flex-1{flex:1 1 0%}.relative{position:relative}.min-h-0{min-height:0}.rounded-2xl{border-radius:1rem}.overflow-hidden{overflow:hidden}.w-full{width:100%}.h-full{height:100%}
+.btn.sm{padding:.45rem .8rem;font-size:.85rem}.btn.ghost{background:transparent;border:2px solid var(--neon);color:var(--neon)}
+.rc{background:var(--panel);border:3px solid var(--grn);border-radius:16px;padding:.6rem .8rem;width:100%;max-height:34dvh;overflow:auto}
+.chip.cur{box-shadow:0 0 0 3px color-mix(in srgb,var(--neon) 35%,transparent)}
+.chip{font-size:10px;padding:3px 1px}
+.hidden{display:none!important}
+.mbar{height:5px;border-radius:3px;background:var(--line);margin-bottom:.6rem;overflow:hidden}.mbar i{display:block;height:100%;background:var(--neon);animation:mb 7s linear forwards}@keyframes mb{from{width:100%}to{width:0}}
+@keyframes lys{to{transform:translate(var(--dx),var(--dy))}}@keyframes flow{to{stroke-dashoffset:-18}}@keyframes fillb{from{transform:scaleY(0)}to{transform:scaleY(1)}}@keyframes conv{from{transform:translateX(-90px);opacity:0}to{transform:none;opacity:1}}@keyframes fall{from{transform:translateY(-70px);opacity:0}to{transform:none;opacity:1}}
+.lys{animation:lys 2s ease-out forwards;transform-box:fill-box}.flow{stroke-dasharray:10 8;animation:flow .7s linear infinite}.fillb{transform-box:fill-box;transform-origin:bottom;animation:fillb 3.2s ease-in .6s both}.conv{animation:conv .8s both}.fall{animation:fall 1.4s both}
+</style>
+<style>
+:root{--bg:#eaf4ff;--panel:#fff;--soft:#f2f8ff;--line:#cfe0f5;--tx:#0f2342;--mut:#52688a;--neon:#0ea5e9;--grn:#10b981;--red:#ef4444;--amb:#f59e0b;--org:#f97316;--bd:#8aa4c8;--on:#fff;color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#06101f;--panel:#0d1b33;--soft:#0a1630;--line:#24456f;--tx:#e6f0ff;--mut:#9ab2d2;--neon:#22d3ee;--grn:#34d399;--red:#f87171;--amb:#fbbf24;--org:#fb923c;--bd:#5b7ba5;--on:#001018;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#06101f;--panel:#0d1b33;--soft:#0a1630;--line:#24456f;--tx:#e6f0ff;--mut:#9ab2d2;--neon:#22d3ee;--grn:#34d399;--red:#f87171;--amb:#fbbf24;--org:#fb923c;--bd:#5b7ba5;--on:#001018;color-scheme:dark}
+html,body{height:100%;overflow:hidden;overscroll-behavior:none;margin:0}
+body{background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:15px;touch-action:manipulation;-webkit-user-select:none;user-select:none}
+#app{height:100dvh;max-width:820px;margin:0 auto;display:flex;flex-direction:column;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+#stage{background:radial-gradient(circle at 1px 1px,color-mix(in srgb,var(--neon) 22%,transparent) 1px,transparent 0) 0 0/18px 18px,linear-gradient(180deg,color-mix(in srgb,var(--neon) 14%,var(--panel)),var(--panel));border:2px solid var(--line)}
+.ib{width:40px;height:40px;border-radius:12px;background:var(--panel);border:2px solid var(--line);font-size:18px;cursor:pointer}
+.chip{flex:1;text-align:center;font-size:11px;font-weight:700;padding:3px 2px;border-radius:999px;background:var(--panel);border:2px solid var(--line);color:var(--mut);white-space:nowrap;overflow:hidden}
+.chip.on{border-color:var(--neon);color:var(--neon)}.chip.ok{background:var(--grn);border-color:var(--grn);color:#fff}
+.av{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--neon),var(--grn));display:grid;place-items:center;font-size:24px;flex:none}
+#tray{touch-action:none}
+.item{touch-action:none;width:84px;min-height:84px;border-radius:18px;background:var(--panel);border:3px solid var(--amb);box-shadow:0 4px 0 color-mix(in srgb,var(--amb) 60%,#000);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:grab;color:var(--tx);padding:4px;transition:transform .15s}
+.item .em{font-size:30px;line-height:1}.item .lb{font-size:11px;font-weight:700;text-align:center;line-height:1.1}
+.item:active{transform:scale(1.08)}.item.sel{border-color:var(--neon);background:color-mix(in srgb,var(--neon) 15%,var(--panel));animation:wig .6s infinite}
+.item.off{opacity:.25;pointer-events:none;box-shadow:none}
+.ghost{position:fixed;left:0;top:0;z-index:50;pointer-events:none;font-size:52px;filter:drop-shadow(0 8px 6px #0006);transform:translate(-50%,-70%)}
+.zone{fill:transparent;stroke:var(--bd);stroke-width:2;stroke-dasharray:8 6;opacity:.5}
+.dragging .zone,.selmode .zone{stroke:var(--amb);opacity:1;fill:color-mix(in srgb,var(--amb) 14%,transparent);animation:dash .8s linear infinite}
+text{fill:var(--tx);font-family:system-ui,sans-serif}.t{font-size:15px;font-weight:700}.mut{fill:var(--mut)}
+.hot{cursor:pointer}
+#toast{position:absolute;top:8px;left:8px;right:8px;z-index:5;padding:.55rem .7rem;border-radius:14px;border:2px solid var(--neon);background:var(--panel);font-size:13.5px;line-height:1.35;box-shadow:0 8px 24px #0003;animation:pi .3s}
+#toast.ok{border-color:var(--grn);background:color-mix(in srgb,var(--grn) 14%,var(--panel))}#toast.err{border-color:var(--red);background:color-mix(in srgb,var(--red) 12%,var(--panel))}#toast.hint{border-color:var(--amb)}
+.ov{position:fixed;inset:0;z-index:40;background:#000a;display:grid;place-items:center;padding:14px}
+.box{background:var(--panel);border:3px solid var(--neon);border-radius:22px;padding:18px;max-width:420px;width:100%;max-height:90dvh;overflow:auto;text-align:center}
+.btn{background:linear-gradient(135deg,var(--neon),var(--grn));color:var(--on);border-radius:14px;padding:.7rem 1.2rem;font-weight:800;border:0;cursor:pointer;font-size:1rem}
+.btn:disabled{opacity:.35}
+.opt{display:block;width:100%;text-align:left;margin:.4rem 0;padding:.65rem;border-radius:12px;border:2px solid var(--line);background:var(--soft);color:var(--tx);font-size:.95rem;cursor:pointer}
+.bu{position:fixed;z-index:60;font-size:24px;pointer-events:none;animation:bu .9s forwards}
+@keyframes bu{to{transform:translate(var(--dx),var(--dy)) scale(1.4);opacity:0}}
+@keyframes dash{to{stroke-dashoffset:-14}}@keyframes wig{50%{transform:rotate(-5deg)}}
+@keyframes pi{from{transform:translateY(-12px);opacity:0}}
+@keyframes sl{to{transform:translateX(-22px)}}@keyframes sr{to{transform:translateX(22px)}}
+@keyframes pop{0%{transform:scale(.5);opacity:0}100%{transform:scale(1);opacity:1}}
+@keyframes drp{from{transform:translateY(-80px);opacity:0}to{transform:none;opacity:1}}
+@keyframes fl{0%,100%{opacity:.35}50%{opacity:1}}
+@keyframes bob{50%{transform:translateY(-6px)}}
+.cl{animation:sl .9s forwards}.cr{animation:sr .9s forwards}.pop{animation:pop .6s both;transform-box:fill-box;transform-origin:center}.ins{animation:drp .9s both}.hb{animation:fl 1.2s infinite}.bob{animation:bob 1.4s infinite}
+</style></head>
+<body>
+<div id="app">
+ <header class="px-2 pt-2">
+  <div class="flex items-center justify-between gap-2"><h1 class="font-extrabold" style="color:var(--neon)">🧬 DNA Rekombinan</h1>
+  <div class="flex gap-1"><button class="ib" id="snd" data-act="snd">🔊</button><button class="ib" data-act="hint">💡</button><button class="ib" data-act="ask">↺</button></div></div>
+  <div id="prog" class="flex gap-1 mt-1"></div></header>
+ <div id="guide" class="px-2 py-1"></div>
+ <div id="stage" class="flex-1 relative min-h-0 mx-2 rounded-2xl overflow-hidden"><svg id="svg" viewBox="0 0 400 400" class="w-full h-full" preserveAspectRatio="xMidYMid meet"></svg><div id="toast" class="hidden"></div></div>
+ <div id="tray" class="flex justify-center gap-2 p-2"></div>
+</div>
+<div id="ov"></div>
+<script>
+const $=s=>document.querySelector(s);
+const INFO={
+plasmid:['Plasmid','Cincin kecil DNA di dalam bakteri. Kita pakai sebagai kurir untuk membawa gen baru.'],
+ampR:['Gen kebal antibiotik (ampR)','Membuat bakteri kebal ampisilin. Hanya bakteri yang menerima plasmid yang hidup di media berantibiotik, ini cara menyeleksi.'],
+lacZ:['Gen biru (lacZα)','Membuat enzim yang mengubah X-gal menjadi warna biru. Kalau gen ini rusak karena disisipi gen baru, koloni jadi putih.'],
+mcs:['Tempat sisip (MCS)','Bagian plasmid dengan banyak tempat potong. Letaknya di tengah gen biru.'],
+gene:['Gen target','Gen yang ingin disalin. Kedua ujungnya punya urutan GAATTC, tempat potong EcoRI.'],
+ecori:['EcoRI (gunting molekuler)','Memotong hanya di urutan GAATTC dan menghasilkan ujung berumbai yang cocok seperti kepingan puzzle.'],
+sticky:['Ujung lengket','Umbai DNA berantai tunggal. A berpasangan dengan T, G dengan C, jadi dua ujung yang cocok menempel seperti velcro.'],
+ligase:['DNA ligase','Ibarat lem permanen yang menyambung rangka DNA (ikatan fosfodiester).'],
+phospho:['Ikatan fosfodiester','Ikatan kuat pembentuk rangka DNA. Enzim restriksi memutusnya, ligase menyambungnya.'],
+hbond:['Ikatan hidrogen','Ikatan lemah antar pasangan basa A-T dan G-C. Menahan potongan agar tidak lepas, tetapi belum permanen.'],
+cell:['Bakteri E. coli','Dipakai sebagai pabrik mini. Setelah menerima plasmid rekombinan, bakteri membelah dan menyalin gen baru.'],
+white:['Koloni putih ✅','Gen biru rusak karena disisipi gen target, jadi X-gal tidak berubah warna. Putih = rekombinan berhasil!'],
+blue:['Koloni biru ❌','Plasmid menutup tanpa gen baru, gen biru masih utuh. Biru = tidak ada gen target.'],
+plate:['Cawan agar','Ampisilin meloloskan hanya bakteri yang menerima plasmid. X-gal membedakan koloni berhasil (putih) dan gagal (biru).']};
+INFO.ins=['Insulin rekombinan','Hormon protein pengatur kadar gula darah. Dibuat oleh bakteri yang membawa gen insulin manusia, sehingga sama dengan insulin manusia.'];
+INFO.mrna=['mRNA dan ribosom','Gen insulin disalin menjadi mRNA. Ribosom membaca mRNA dan merangkai asam amino menjadi protein insulin.'];
+INFO.ferm=['Tangki fermentasi','Bakteri ditumbuhkan dalam tangki besar berisi nutrisi, suhu, dan oksigen terkontrol agar membelah cepat.'];
+INFO.filt=['Pemurnian','Insulin dipisahkan dari sisa sel dan pengotor lewat penyaringan sampai sangat murni.'];
+INFO.bottle=['Botol insulin','Insulin murni dikemas steril dalam botol, lalu dipakai penderita diabetes untuk mengatur gula darah.'];
+const GN={ins:'Gen insulin',gfp:'Gen GFP'};
+const STEPS=['1 Bahan','2 Potong','3 Sambung','4 Bakteri','5 Produksi'];
+const MIS=[
+['🎯 Misi 1: Siapkan bahan','Seret gen dan plasmid ke tempatnya.','Plasmid = kurir, gen = isi paket yang diantar.'],
+['✂️ Misi 2: Potong DNA','Seret gunting (enzim) ke plasmid DAN gen. Pakai enzim yang sama!','Enzim restriksi = gunting yang hanya memotong urutan huruf tertentu.'],
+['🧩 Misi 3: Sambung DNA','Masukkan potongan gen ke plasmid, lalu sambung.','Ujung lengket = kepingan puzzle yang pas, ligase = lemnya.'],
+['🦠 Misi 4: Masuk ke bakteri','Masukkan plasmid ke bakteri, lalu temukan koloni yang berhasil.','Heat shock membuka pintu kecil di dinding bakteri.'],['🏭 Tahap Lanjutan: Produksi insulin','Amati bagaimana bakteri E. coli rekombinan menghasilkan insulin sampai dikemas ke dalam botol.','Bakteri = pabrik mini yang membaca gen insulin lalu membuat proteinnya.']];
+const HINT=['Pilih pUC19. pBlank tidak punya tempat sisip dan gen penanda.','Gen punya tanda GAATTC di kedua ujung. Pakai EcoRI untuk plasmid dan gen.','Masukkan dulu potongan gen, baru tambahkan ligase (lem DNA).','Urutan: plasmid, es, panas, pulih. Media harus punya antibiotik dan X-gal.','Gunakan tombol ◀ ▶ untuk melihat tiap tahap, atau tekan Putar agar berjalan otomatis.'];
+const STP=[
+['Pilih gen yang sesuai tujuan (membuat insulin), seret ke kotak GEN','Pilih plasmid yang punya tempat sisip dan penanda, seret ke lingkaran PLASMID'],
+['Pilih enzim restriksi, seret ke PLASMID','Seret enzim yang sama ke GEN','Amati ujung lengket yang terbentuk'],
+['Seret potongan gen ke PLASMID','Pilih enzim penyambung, seret ke PLASMID','Amati rangka DNA yang tersambung'],
+['Seret plasmid baru ke tabung','Lakukan perlakuan suhu secara berurutan','Pilih cawan media yang menyeleksi dan membedakan warna','Amati koloni putih dan biru'],['Tekan Putar, atau gunakan tombol ◀ ▶','Amati bakteri berkembang biak, membuat insulin, lalu dipanen','Amati insulin dimurnikan dan dimasukkan ke botol']];
+const RES=[
+()=>'Kamu memilih <b>gen insulin manusia</b> sebagai gen target dan plasmid <b>pUC19</b> sebagai kurir: punya tempat sisip, gen kebal antibiotik, dan gen biru.',
+()=>'<b>EcoRI</b> memotong plasmid dan gen di urutan GAATTC. Plasmid terbuka dan gen terpotong dengan <b>ujung lengket (AATT)</b> yang saling cocok.',
+()=>'Potongan gen menempel lewat ikatan hidrogen, lalu <b>ligase</b> menyambung rangka DNA (ikatan fosfodiester). Terbentuk <b>plasmid rekombinan</b> pembawa gen insulin, dan gen biru menjadi rusak.',
+()=>S.done[3]?'Di media LB + ampisilin + X-gal, koloni <b>putih</b> membawa gen insulin (rekombinan), koloni <b>biru</b> hanya plasmid kosong. Koloni putih dikultur, bakteri membuat insulin, lalu dimurnikan menjadi <b>insulin rekombinan</b> untuk penderita diabetes. Ketuk koloni untuk mengamati.':'Misi ini belum selesai.',()=>'Bakteri rekombinan memperbanyak diri, membaca gen insulin, dan menghasilkan insulin. Sel dipecah, insulin dipisahkan dan dimurnikan, lalu dimasukkan ke botol sebagai <b>insulin rekombinan manusia</b>.'];
+const stars=()=>S.err<=2?3:S.err<=6?2:1;
+function rcard(){const i=S.view,live=i===S.step;let b='';
+ if(live&&S.done[i]&&!S.fin)b=S.qok[i]?`<button class="btn sm" data-act="${i===3?'final':'next'}">${i===3?'🏁 Lihat hasil akhir':'Misi berikutnya ➜'}</button>`:'<button class="btn sm" data-act="quiz">🧠 Kerjakan kuis</button>';
+ if(!live)b+=`<button class="btn sm" data-act="back">↩ Kembali ke Misi ${S.step+1}</button>`;
+ if(S.fin)b+=' <button class="btn sm" data-act="prod">🎬 Lanjut: produksi insulin</button> <button class="btn sm ghost" data-act="ask">↺ Main lagi</button>';
+ const t=S.fin&&i===3?'🎉 Hasil akhir '+'⭐'.repeat(stars())+'☆'.repeat(3-stars()):'✅ Hasil Misi '+(i+1);
+ return `<div class="rc"><b>${t}</b><p class="text-sm" style="margin:.25rem 0 .5rem">${RES[i]()}</p><div class="flex gap-2" style="flex-wrap:wrap">${b}</div></div>`}
+function mission(){const st=S.view,m=MIS[st];$('#ov').innerHTML=`<div class="ov"><div class="box" data-m="1" style="text-align:left"><div class="mbar"><i></i></div><div class="flex items-center gap-2" style="margin-bottom:.5rem"><div class="av">🧑‍🔬</div><b class="text-lg">${m[0]}</b></div><p class="my-2">${m[1]}</p><p class="text-sm my-2" style="color:var(--mut)">💭 ${m[2]}</p><b class="text-sm">Langkah-langkahnya:</b><ol class="text-sm" style="padding-left:1.2rem;margin:.3rem 0 .6rem">${STP[st].map(x=>`<li>${x}</li>`).join('')}</ol><div style="text-align:center;margin-top:.8rem"><button class="btn" data-act="close">Mengerti!</button><p class="text-xs" style="color:var(--mut);margin-top:.4rem">Menutup otomatis. Ketuk baris pemandu 🧑‍🔬 untuk membuka lagi.</p></div></div></div>`;clearTimeout(mt);mt=setTimeout(()=>{if($('#ov .box[data-m]'))$('#ov').innerHTML=''},7000)}
+function ask(){$('#ov').innerHTML='<div class="ov"><div class="box"><div style="font-size:36px">↺</div><b class="text-lg">Ulangi dari awal?</b><p class="text-sm my-2">Semua hasil misi akan dihapus.</p><button class="btn" data-act="reset">Ya, ulangi</button> <button class="btn ghost" data-act="close">Batal</button></div></div>'}
+let pt,mt;
+function stopAuto(){clearInterval(pt);if(S)S.auto=false}
+function play(){clearInterval(pt);S.auto=true;pt=setInterval(()=>{if(S.pp<4){S.pp++;render();sfx('ok')}else{stopAuto();renderTray()}},6500)}
+function hintm(){$('#ov').innerHTML=`<div class="ov"><div class="box" style="text-align:left"><b class="text-lg">💡 Petunjuk tambahan</b><p class="my-2">${HINT[S.view]}</p><div style="text-align:center"><button class="btn" data-act="close">Tutup</button></div></div></div>`}
+const PH=[
+['1. Bakteri berkembang biak','Koloni putih dipindah ke tangki fermentasi berisi nutrisi. Bakteri membelah cepat (1 menjadi 2, 4, 8, ...) dan setiap sel membawa plasmid dengan gen insulin.'],
+['2. Bakteri membuat insulin','Di dalam sel, gen insulin dibaca menjadi mRNA, lalu ribosom menyusun protein insulin. Insulin menumpuk di dalam sel.'],
+['3. Panen dan sel dipecah','Bakteri dipanen, lalu selnya dipecahkan agar insulin keluar ke dalam cairan.'],
+['4. Pemurnian','Cairan disaring dan dimurnikan. Insulin dipisahkan dari sisa sel dan kotoran.'],
+['5. Insulin masuk botol','Insulin murni dimasukkan ke botol steril, diberi label, dan siap dipakai penderita diabetes.']];
+const PSQ=['E. coli rekombinan membelah: 1 → 2 → 4 → 8','gen insulin → mRNA → protein insulin','sel lisis: insulin keluar ke cairan','penyaringan: sisa sel tertahan, insulin lolos','insulin murni → botol steril'];
+const PUR='#8b5cf6';
+function pcard(){const p=S.pp,h=PH[p];return `<div class="rc" style="border-color:var(--neon)"><b>🎬 ${h[0]}</b> <span class="text-xs" style="color:var(--mut)">(${p+1}/5)</span><p class="text-sm" style="margin:.25rem 0 .5rem">${h[1]}</p><div class="flex gap-2" style="flex-wrap:wrap"><button class="btn sm ghost" data-act="pprev" ${p?'':'disabled'}>◀</button><button class="btn sm" data-act="pplay">${S.auto?'⏸ Jeda':'▶ Putar'}</button><button class="btn sm ghost" data-act="pnext" ${p<4?'':'disabled'}>▶</button><button class="btn sm ghost" data-act="back">↩ Hasil akhir</button></div></div>`}
+function prodScene(p){let o='';
+ if(p===0){
+  o='<g class="hot" data-info="ferm"><rect x="120" y="50" width="160" height="250" rx="30" style="fill:color-mix(in srgb,var(--neon) 10%,var(--panel));stroke:var(--bd)" stroke-width="5"/><rect x="128" y="110" width="144" height="182" rx="24" style="fill:color-mix(in srgb,var(--neon) 22%,transparent)"/></g><text x="200" y="326" text-anchor="middle" class="t">tangki fermentasi</text><circle cx="52" cy="90" r="22" style="fill:#f5f5f0;stroke:var(--bd)" stroke-width="3"/><text x="52" y="132" text-anchor="middle" class="t">koloni</text><text x="52" y="148" text-anchor="middle" class="t">putih</text><text x="92" y="100" style="font-size:26px;fill:var(--amb)" class="bob">➜</text>';
+  for(let i=0;i<14;i++)o+=`<g class="pop hot" data-info="cell" style="animation-delay:${.3+i*.3}s"><rect x="${138+(i*47)%90}" y="${125+(i*61)%150}" width="34" height="16" rx="8" style="fill:color-mix(in srgb,var(--grn) 28%,transparent);stroke:var(--grn)" stroke-width="2"/></g>`;
+  for(let i=0;i<4;i++)o+=`<circle class="bob" cx="${150+i*30}" cy="${280-i*20}" r="4" fill="none" style="stroke:var(--neon);animation-delay:${i*.3}s"/>`}
+ if(p===1){
+  o='<g class="hot" data-info="cell"><rect x="30" y="130" width="340" height="170" rx="85" style="fill:color-mix(in srgb,var(--grn) 15%,transparent);stroke:var(--grn)" stroke-width="5"/></g><circle class="hot" data-info="plasmid" cx="95" cy="215" r="26" fill="none" style="stroke:var(--org)" stroke-width="7"/><text x="95" y="118" text-anchor="middle" class="t" style="fill:var(--org)">plasmid</text><path class="pop hot" data-info="mrna" d="M135 215q10-24 20 0t20 0t20 0" fill="none" style="stroke:var(--neon);animation-delay:.6s" stroke-width="4"/><text x="165" y="118" text-anchor="middle" class="t" style="fill:var(--neon)">mRNA</text><g class="pop hot" data-info="mrna" style="animation-delay:1.2s"><ellipse cx="250" cy="224" rx="24" ry="13" style="fill:var(--amb)"/><ellipse cx="250" cy="203" rx="17" ry="10" style="fill:var(--amb)"/></g><text x="250" y="118" text-anchor="middle" class="t" style="fill:var(--amb)">ribosom</text><text x="325" y="118" text-anchor="middle" class="t" style="fill:'+PUR+'">insulin</text>';
+  for(let i=0;i<12;i++)o+=`<circle class="pop hot" data-info="ins" cx="${296+(i%4)*17}" cy="${170+Math.floor(i/4)*36+(i%2)*10}" r="6" style="fill:${PUR};animation-delay:${1.8+i*.3}s"/>`}
+ if(p===2){
+  o='<rect x="30" y="130" width="340" height="170" rx="85" fill="none" style="stroke:var(--red)" stroke-width="4" stroke-dasharray="10 9" class="hb"/><text x="200" y="110" text-anchor="middle" class="t" style="fill:var(--red)">⚡ sel dipecah</text>';
+  for(let i=0;i<12;i++){const a=i*30*Math.PI/180,d=70+(i%3)*45;o+=`<circle class="lys hot" data-info="ins" cx="${160+(i%4)*27}" cy="${195+(i%3)*22}" r="6" style="fill:${PUR};--dx:${(Math.cos(a)*d).toFixed(0)}px;--dy:${(Math.sin(a)*d*.9).toFixed(0)}px;animation-delay:${i*.08}s"/>`}
+  for(let i=0;i<6;i++)o+=`<rect class="lys" x="${130+i*28}" y="${200+(i%2)*18}" width="14" height="8" rx="3" style="fill:var(--bd);--dx:${(i-2.5)*18}px;--dy:${(i%2?1:-1)*(35+i*6)}px"/>`}
+ if(p===3){
+  o='<rect x="90" y="40" width="220" height="120" rx="14" style="fill:color-mix(in srgb,var(--bd) 22%,transparent);stroke:var(--bd)" stroke-width="4"/><text x="200" y="30" text-anchor="middle" class="t mut">insulin + sisa sel</text>';
+  for(let i=0;i<8;i++)o+=`<rect x="${105+i*24}" y="${105+(i*13)%40}" width="14" height="8" rx="3" style="fill:var(--bd)"/><circle cx="${115+i*24}" cy="${75+(i*17)%30}" r="6" style="fill:${PUR};opacity:.45"/>`;
+  o+='<g class="hot" data-info="filt"><rect x="90" y="175" width="220" height="10" rx="5" style="fill:var(--amb)"/><text x="200" y="205" text-anchor="middle" class="t" style="fill:var(--amb)">penyaring</text></g><rect x="110" y="235" width="180" height="100" rx="14" style="fill:color-mix(in srgb,var(--neon) 12%,transparent);stroke:var(--bd)" stroke-width="4"/><text x="200" y="358" text-anchor="middle" class="t" style="fill:'+PUR+'">insulin murni</text>';
+  for(let i=0;i<8;i++)o+=`<circle class="fall hot" data-info="ins" cx="${125+i*21}" cy="${300+(i%3)*10}" r="6" style="fill:${PUR};animation-delay:${.4+i*.4}s"/>`}
+ if(p===4){
+  const bt=(x,d)=>`<g class="conv hot" data-info="bottle" style="animation-delay:${d}s"><rect x="${x}" y="225" width="56" height="90" rx="9" style="fill:#dff3ff;stroke:var(--bd)" stroke-width="3"/><rect x="${x+4}" y="240" width="48" height="71" rx="6" style="fill:${PUR}"/><rect x="${x+8}" y="208" width="40" height="18" rx="4" style="fill:var(--red)"/><rect x="${x+6}" y="262" width="44" height="26" rx="4" style="fill:#fff"/><text x="${x+28}" y="279" text-anchor="middle" style="font-size:9px;font-weight:700;fill:#0f2342">INSULIN</text></g>`;
+  o='<text x="200" y="22" text-anchor="middle" class="t" style="fill:'+PUR+'">insulin murni</text><line class="flow" x1="200" y1="30" x2="200" y2="180" style="stroke:'+PUR+'" stroke-width="8"/><rect x="188" y="176" width="24" height="16" rx="3" style="fill:var(--bd)"/><g class="hot" data-info="bottle"><rect x="172" y="225" width="56" height="90" rx="9" style="fill:#dff3ff;stroke:var(--bd)" stroke-width="3"/><rect class="fillb" x="176" y="240" width="48" height="71" rx="6" style="fill:'+PUR+'"/><g class="pop" style="animation-delay:3.9s"><rect x="180" y="208" width="40" height="18" rx="4" style="fill:var(--red)"/><rect x="178" y="262" width="44" height="26" rx="4" style="fill:#fff"/><text x="200" y="279" text-anchor="middle" style="font-size:9px;font-weight:700;fill:#0f2342">INSULIN</text></g></g>'+bt(44,0)+bt(300,.3)+'<rect x="15" y="316" width="370" height="14" rx="7" style="fill:var(--bd)"/><text x="200" y="360" text-anchor="middle" class="t pop" style="fill:var(--grn);animation-delay:4.2s">✅ Insulin rekombinan manusia siap pakai 💉</text>'}
+ return o+`<text x="200" y="395" text-anchor="middle" style="font:12px ui-monospace,Menlo,monospace;fill:var(--mut)">${PSQ[p]}</text>`}
+const QZ=[
+{q:'Untuk apa gen ampR pada plasmid?',o:['Agar plasmid bisa berkembang biak','Agar bakteri penerima plasmid bisa diseleksi','Agar koloni berwarna biru'],a:1,e:'ampR membuat bakteri kebal antibiotik, jadi yang tumbuh pasti menerima plasmid.'},
+{q:'Mengapa plasmid dan gen dipotong dengan enzim yang sama?',o:['Supaya ujung potongannya cocok dan bisa menempel','Supaya DNA jadi lebih panjang','Supaya enzimnya hemat'],a:0,e:'Enzim yang sama menghasilkan ujung lengket yang saling cocok.'},
+{q:'Apa tugas DNA ligase?',o:['Memotong DNA','Menyambung rangka DNA','Membuat antibiotik'],a:1,e:'Ligase bekerja seperti lem, menyambung rangka gula-fosfat DNA.'},
+{q:'Koloni putih di media amp + X-gal artinya...',o:['Bakteri tidak menerima plasmid','Plasmid tanpa gen baru','Plasmid membawa gen baru'],a:2,e:'Gen baru merusak gen biru, jadi koloni putih.'}];
+/* ---------- audio ---------- */
+let AC,mg,snd=true,tm,nt=0,si=0;
+const M=[72,76,79,84,79,76,79,81,77,81,84,81,77,81,79,76,76,79,83,86,83,79,83,84,79,76,72,76,79,76,72,0],B=[48,53,55,48];
+const hz=n=>440*2**((n-69)/12);
+function A(){if(!AC){AC=new(window.AudioContext||window.webkitAudioContext)();mg=AC.createGain();mg.gain.value=snd?1:0;mg.connect(AC.destination)}if(AC.state==='suspended')AC.resume()}
+function tone(f,t,d,ty,v){const o=AC.createOscillator(),g=AC.createGain();o.type=ty;o.frequency.value=f;g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g);g.connect(mg);o.start(t);o.stop(t+d+.02)}
+function sched(){while(nt<AC.currentTime+.3){const m=M[si%32];if(m)tone(hz(m),nt,.2,'square',.03);if(si%2===0)tone(hz(B[Math.floor(si/8)%4]+(si%4===2?12:0)),nt,.35,'triangle',.07);nt+=.21;si++}}
+function music(){A();nt=AC.currentTime+.1;clearInterval(tm);tm=setInterval(sched,80)}
+function sfx(k){if(!AC)return;const t=AC.currentTime,P=(a,ty='square',v=.06,d=.16)=>a.forEach((n,i)=>tone(hz(n),t+i*.08,d,ty,v));
+ ({ok:()=>P([72,76,79,84]),err:()=>{tone(150,t,.25,'sawtooth',.07);tone(110,t+.12,.3,'sawtooth',.07)},pick:()=>P([84],'square',.05,.08),snip:()=>P([96,88],'square',.06,.06),win:()=>P([72,76,79,84,88,91],'square',.07,.2)})[k]?.()}
+document.addEventListener('visibilitychange',()=>{if(AC)document.hidden?AC.suspend():AC.resume()});
+/* ---------- state ---------- */
+let S,tt;
+const init=()=>{clearInterval(pt);S={id:Date.now(),step:0,view:0,qok:[],fin:false,pp:0,auto:false,gene:null,vec:null,pE:null,gE:null,cut:false,ins:false,lig:false,t4:0,media:null,done:[0,0,0,0],sel:null,err:0};render();enter()};
+function toast(k,h,ms=4000){const e=$('#toast');e.className=k;e.innerHTML=h+'<div style="text-align:right;font-size:11px;opacity:.6">ketuk untuk menutup ✕</div>';clearTimeout(tt);tt=setTimeout(()=>e.classList.add('hidden'),ms)}
+const info=k=>{const[t,d]=INFO[k];toast('info',`<b>${t}</b><br>${d}`)};
+const enter=()=>mission();
+function burst(x,y,e){for(let i=0;i<7;i++){const s=document.createElement('span');s.className='bu';s.textContent=e;s.style.cssText=`left:${x}px;top:${y}px;--dx:${(Math.random()-.5)*160}px;--dy:${-30-Math.random()*110}px`;document.body.appendChild(s);setTimeout(()=>s.remove(),900)}}
+/* ---------- drawing ---------- */
+const arc=(a,b,r,c,w)=>{const p=t=>[150+r*Math.sin(t*Math.PI/180),150-r*Math.cos(t*Math.PI/180)];const P=p(a),Q=p(b);return `<path d="M${P[0].toFixed(1)} ${P[1].toFixed(1)} A${r} ${r} 0 ${b-a>180?1:0} 1 ${Q[0].toFixed(1)} ${Q[1].toFixed(1)}" fill="none" style="stroke:${c}" stroke-width="${w}"/>`};
+const G=(x,y,s,i)=>`<g transform="translate(${x},${y}) scale(${s})">${i}</g>`;
+const ZC=(id,x,y,r)=>`<circle class="zone" data-drop="${id}" cx="${x}" cy="${y}" r="${r}"/>`,ZR=(id,x,y,w,h)=>`<rect class="zone" data-drop="${id}" x="${x}" y="${y}" width="${w}" height="${h}" rx="18"/>`;
+function plasmid(m){
+ if(m==='blank')return '<g class="hot" data-info="plasmid"><circle cx="150" cy="150" r="95" fill="none" style="stroke:var(--bd)" stroke-width="9"/><text x="150" y="150" text-anchor="middle" class="t">pBlank</text><text x="150" y="172" text-anchor="middle" class="mut" style="font-size:13px">polos, tanpa penanda</text></g>';
+ let s='<g class="hot" data-info="plasmid">'+(m==='open'?arc(12,348,95,'var(--bd)',9):'<circle cx="150" cy="150" r="95" fill="none" style="stroke:var(--bd)" stroke-width="9"/>')+'</g>';
+ s+='<g class="hot" data-info="ampR">'+arc(190,320,95,'var(--grn)',15)+'<text x="150" y="176" text-anchor="middle" style="fill:var(--grn);font-size:14px;font-weight:700">● gen kebal antibiotik</text></g>';
+ s+=`<g class="hot" data-info="lacZ" ${m==='recomb'?'opacity=".4"':''}>`+(m==='open'?arc(15,150,95,'var(--neon)',15)+arc(330,345,95,'var(--neon)',15):arc(330,510,95,'var(--neon)',15))+'<text x="150" y="196" text-anchor="middle" style="fill:var(--neon);font-size:14px;font-weight:700">'+(m==='recomb'?'● gen biru (rusak)':'● gen biru')+'</text></g>';
+ if(m==='closed')s+='<g class="hot" data-info="mcs">'+arc(352,368,95,'var(--amb)',20)+'<text x="150" y="30" text-anchor="middle" class="t" style="fill:var(--amb)">tempat sisip</text></g>';
+ if(m==='open')s+='<g class="hot pop" data-info="sticky"><line x1="172" y1="48" x2="172" y2="68" style="stroke:var(--amb)" stroke-width="4"/><line x1="128" y1="48" x2="128" y2="68" style="stroke:var(--amb)" stroke-width="4"/><text x="150" y="32" text-anchor="middle" class="t bob" style="fill:var(--amb)">celah ⬇</text></g>';
+ if(m==='recomb')s+='<g class="hot ins" data-info="gene">'+arc(338,382,95,'var(--org)',22)+'<text x="150" y="30" text-anchor="middle" class="t" style="fill:var(--org)">'+GN[S.gene]+'</text></g>';
+ return s+'<text x="150" y="146" text-anchor="middle" class="t" style="font-size:18px">pUC19</text>'}
+function gene(m){
+ const n=S.gene?GN[S.gene]:'Gen';let L=m==='cut'?'cl':'',R=m==='cut'?'cr':'';
+ let s=`<g class="${L}"><rect x="8" y="50" width="42" height="22" rx="4" style="fill:var(--bd)" opacity=".5"/></g><g class="${R}"><rect x="250" y="50" width="42" height="22" rx="4" style="fill:var(--bd)" opacity=".5"/></g>`;
+ s+=`<g class="hot" data-info="gene"><rect x="50" y="46" width="200" height="30" rx="9" style="fill:var(--org)"/><text x="150" y="67" text-anchor="middle" class="t" style="fill:#1a0a00;font-size:16px">${n}</text></g>`;
+ s+='<g class="hot" data-info="ecori"><rect x="46" y="40" width="7" height="42" style="fill:var(--amb)"/><rect x="247" y="40" width="7" height="42" style="fill:var(--amb)"/><text x="49" y="30" text-anchor="middle" class="t" style="fill:var(--amb)">GAATTC</text><text x="251" y="30" text-anchor="middle" class="t" style="fill:var(--amb)">GAATTC</text></g>';
+ return s+(m==='cut'?'<text x="150" y="108" text-anchor="middle" class="t pop" style="fill:var(--grn)">ujung lengket</text>':'')}
+function zoom(l){
+ const T='GAATTC',Bs='CTTAAG';let s='<g class="hot" data-info="hbond">';
+ for(let i=0;i<6;i++){const x=50+i*40;s+=`<text x="${x}" y="38" text-anchor="middle" class="t" style="fill:var(--org);font-size:18px">${T[i]}</text><text x="${x}" y="100" text-anchor="middle" class="t" style="fill:var(--neon);font-size:18px">${Bs[i]}</text><line x1="${x}" y1="46" x2="${x}" y2="84" style="stroke:var(--mut)" stroke-width="2" stroke-dasharray="3 3" class="${i>0&&i<5?'hb':''}"/>`}
+ s+='</g><g class="hot" data-info="phospho">'+(l?'<rect x="62" y="30" width="16" height="5" style="fill:var(--grn)" class="pop"/><rect x="222" y="92" width="16" height="5" style="fill:var(--grn)" class="pop"/>':'<text x="70" y="20" text-anchor="middle" class="t" style="fill:var(--red)">✂ putus</text><text x="230" y="118" text-anchor="middle" class="t" style="fill:var(--red)">✂ putus</text>')+'</g>';
+ return s}
+function cellg(){return `<g class="hot" data-info="cell"><rect x="30" y="20" width="240" height="90" rx="45" style="fill:color-mix(in srgb,var(--grn) 18%,transparent);stroke:var(--grn)" stroke-width="4"/><path d="M90 65c20-25 40 25 60 0s40 20 60-5" fill="none" style="stroke:var(--mut)" stroke-width="3"/><text x="150" y="132" text-anchor="middle" class="t mut">bakteri E. coli</text></g>`+(S.t4>=3?`<g class="${S.t4===3?'ins':''}"><circle cx="150" cy="82" r="13" fill="none" style="stroke:var(--org)" stroke-width="5"/></g>`:S.t4>=1?'<circle cx="150" cy="6" r="10" fill="none" style="stroke:var(--org)" stroke-width="4" class="bob"/>':'')}
+function plate(){
+ const df=S.media==='amp-xgal';let c='';
+ for(let i=0;i<14;i++){const a=i*137.5*Math.PI/180,r=24+(i*37)%90;c+=`<circle cx="${(150+r*Math.cos(a)).toFixed(0)}" cy="${(150+r*Math.sin(a)).toFixed(0)}" r="10" class="pop hot" data-info="${df?(i<4?'white':'blue'):'plate'}" style="fill:${df?(i<4?'#f5f5f0':'#2f5fe3'):'#e8dcb0'};stroke:#0004;animation-delay:${i*.08}s"/>`}
+ return `<circle cx="150" cy="150" r="135" style="fill:${df?'#d8cf9a':'#c9b97a'};stroke:var(--bd)" stroke-width="7"/>${c}`}
+function tube(){
+ const t=S.t4,bg=t===2?'<rect x="14" y="120" width="132" height="190" rx="22" fill="#9fe0ff" opacity=".55" class="hb"/><text x="30" y="150" style="font-size:26px">🧊</text><text x="100" y="290" style="font-size:26px">🧊</text>':t===3?'<rect x="14" y="120" width="132" height="190" rx="22" fill="#ff9a4d" opacity=".5" class="hb"/><text x="60" y="330" style="font-size:30px">🔥</text>':t===4?'<rect x="14" y="120" width="132" height="190" rx="22" fill="#6ee7a8" opacity=".4"/>':'';
+ let dots='';for(let i=0;i<9;i++)dots+=`<ellipse cx="${60+(i*29)%60}" cy="${160+(i*43)%120}" rx="7" ry="4" fill="none" style="stroke:var(--grn)" stroke-width="2"/>`+(t>=1?`<circle cx="${70+(i*37)%50}" cy="${170+(i*53)%110}" r="3" style="fill:var(--org)"/>`:'');
+ const lab=['bakteri E. coli','bakteri + plasmid','0 °C 🧊','42 °C 🔥','37 °C 🌡️'][t];
+ return bg+`<g class="hot" data-info="cell"><rect x="40" y="70" width="80" height="230" rx="34" style="fill:color-mix(in srgb,var(--neon) 10%,var(--panel));stroke:var(--bd)" stroke-width="4"/><rect x="46" y="140" width="68" height="154" rx="28" style="fill:color-mix(in srgb,var(--neon) 25%,transparent)"/>${dots}</g><text x="80" y="350" text-anchor="middle" class="t">${lab}</text>`}
+function scene(){const st=S.view;if(st===4)return prodScene(S.pp);let o='';
+ if(st===0){o=ZC('slotP',200,115,88)+ZR('slotG',52,262,296,100);
+  o+=S.vec?G(125,40,.5,plasmid(S.vec==='puc'?'closed':'blank')):'<text x="200" y="122" text-anchor="middle" class="t mut">⭕ taruh PLASMID</text>';
+  o+=S.gene?G(65,258,.9,gene('intact')):'<text x="200" y="318" text-anchor="middle" class="t mut">🧬 taruh GEN di sini</text>'}
+ if(st===1){o=ZC('plasmid',200,130,118)+ZR('gene',40,252,320,120)+G(80,10,.8,plasmid(S.cut?'open':'closed'))+G(50,258,1,gene(S.cut?'cut':'intact'));
+  if(!S.cut&&S.pE)o+=`<text x="10" y="24" class="t" style="fill:var(--amb)">✂ plasmid: ${S.pE}</text>`;
+  if(!S.cut&&S.gE)o+=`<text x="10" y="250" class="t" style="fill:var(--amb)">✂ gen: ${S.gE}</text>`}
+ if(st===2){o=ZC('plasmid',200,130,122)+G(80,10,.8,plasmid(S.ins?'recomb':'open'))+G(70,262,.87,zoom(S.lig))+(S.lig?'<text x="200" y="250" text-anchor="middle" style="font-size:30px" class="pop">✨</text>':'')}
+ if(st===3){o=ZC('tube',80,200,100)+tube()+(S.media?G(145,70,.82,plate()):G(130,30,.9,cellg()))+(S.fin?'<text x="80" y="52" text-anchor="middle" style="font-size:34px" class="pop">💉</text>':'')}
+ const sq=[S.gene?'5′-GAATTC-ATG…TAA-GAATTC-3′':'5′-…-3′ (urutan basa DNA)',S.cut?'5′-G   AATTC-3′ · 3′-CTTAA   G-5′ (umbai AATT)':'5′-G↓AATTC-3′ · 3′-CTTAA↑G-5′',S.lig?'GAATTC utuh · rangka tersambung':S.ins?'G ┊ AATTC · rangka masih putus':'AATT ⟷ TTAA (ikatan hidrogen)',S.media?'ampisilin = seleksi · X-gal = warna':['siapkan tabung','sel + plasmid','0 °C','42 °C, 45 detik','37 °C, 1 jam'][S.t4]][st];
+ return o+`<text x="200" y="395" text-anchor="middle" style="font:12px ui-monospace,Menlo,monospace;fill:var(--mut)">${sq}</text>`}
+/* ---------- tray & guide ---------- */
+function items(){const t=S.t4;return[
+[{k:'g:ins',e:'💉',l:'Gen insulin',off:S.gene==='ins'},{k:'g:gfp',e:'🟢',l:'Gen GFP',off:S.gene==='gfp'},{k:'v:puc',e:'⭕',l:'pUC19',off:S.vec==='puc'},{k:'v:blank',e:'⚪',l:'pBlank',off:S.vec==='blank'}],
+['EcoRI','BamHI','HaeIII'].map(e=>({k:'e:'+e,e:'✂️',l:e,off:S.cut})),
+[{k:'ins',e:'🧩',l:'Potongan gen',off:S.ins},{k:'lig',e:'🧴',l:'DNA ligase',off:S.lig},{k:'pol',e:'🏭',l:'Polimerase',off:S.lig}],
+t<4?[{k:'rp',e:'⭕',l:'Plasmid baru',off:t>=1},{k:'ice',e:'🧊',l:'Es 0 °C',off:t>=2},{k:'heat',e:'🔥',l:'42 °C',off:t>=3},{k:'rec',e:'🌡️',l:'37 °C',off:t>=4}]:[{k:'m:lb',e:'🟡',l:'LB'},{k:'m:amp',e:'💊',l:'LB + Amp'},{k:'m:amp-xgal',e:'🔵',l:'LB+Amp+X-gal'}]][S.step]}
+function nxt(){const t=S.t4;return[
+S.gene!=='ins'?'Seret gen yang tepat (untuk membuat insulin) ke kotak GEN':!S.vec||S.vec==='blank'?'Seret plasmid yang tepat ke lingkaran PLASMID':'Selesai!',
+!S.pE?'Seret ✂️ enzim ke PLASMID':!S.gE?'Sekarang seret enzim yang sama ke GEN':'Selesai!',
+!S.ins?'Seret 🧩 potongan gen ke PLASMID':!S.lig?'Seret 🧴 ligase ke PLASMID':'Selesai!',
+t===0?'Seret ⭕ plasmid ke TABUNG':t===1?'Seret 🧊 es ke tabung':t===2?'Seret 🔥 heat shock ke tabung':t===3?'Seret 🌡️ pemulihan ke tabung':!S.done[3]?'Seret cawan media yang tepat ke tabung':'Selesai!'][S.step]}
+function renderTray(){
+ const live=S.view===S.step&&!S.done[S.step]&&!S.fin&&S.view<4;
+ $('#tray').innerHTML=S.view===4?pcard():live?items().map(i=>`<button class="item ${i.off?'off':''} ${S.sel===i.k?'sel':''}" data-k="${i.k}"><span class="em">${i.e}</span><span class="lb">${i.l}</span></button>`).join(''):rcard();
+ $('#stage').classList.toggle('selmode',!!S.sel&&live)}
+function render(){
+ const st=S.step,vw=S.view,live=vw===st;
+ if(vw!==4)stopAuto();
+ $('#toast').classList.add('hidden');
+ $('#prog').innerHTML=STEPS.map((n,i)=>{const can=i<4?i<=st&&(S.done[i]||i===st):S.fin,dn=i<4&&S.done[i];return `<div class="chip ${dn?'ok':(i<4?i===st&&!S.fin:S.fin)?'on':''} ${i===vw?'cur':''}" ${can?`data-act="view" data-v="${i}" style="cursor:pointer"`:''}>${dn?'✓ ':''}${n}</div>`}).join('');
+ $('#guide').innerHTML=`<div class="flex items-center gap-2" data-act="mis" style="cursor:pointer"><div class="av">🧑‍🔬</div><div class="min-w-0"><div class="text-xs font-bold" style="color:var(--neon)">${MIS[vw][0]} · ketuk untuk petunjuk ▸</div><div class="font-bold leading-tight">${vw===4?'🎬 Amati proses produksi insulin di dalam bakteri':!live?'📋 Kamu sedang meninjau hasil misi ini':S.fin?'🎉 Semua misi selesai! Amati hasil akhir, lalu lanjut ke tahap 5':S.done[st]?'✅ Misi selesai! Amati hasilnya, lalu kerjakan kuis 👇':'👉 '+nxt()}</div></div></div>`;
+ $('#svg').innerHTML=scene();renderTray()}
+/* ---------- game logic ---------- */
+function act(k,t,x,y){
+ if(S.view!==S.step||S.done[S.step])return;const st=S.step,[a,b]=k.split(':');
+ const ok=(m,e='✨')=>{sfx('ok');burst(x,y,e);toast('ok','✅ '+m,3500)},bad=m=>{sfx('err');S.err++;toast('err','⚠️ '+m,8000)};
+ const win=m=>{S.done[st]=1;render();sfx('win');burst(x,y,'🎉');toast('ok','🎉 '+m,3500)};
+ if(st===0){
+  if(a==='g'){if(t!=='slotG')return bad('Gen ditaruh di kotak GEN (kotak panjang di bawah).');S.gene=b;if(b==='gfp'){render();return bad('Gen GFP membuat protein hijau berpendar, bukan insulin. Tujuan kita membuat insulin, jadi pilih gen insulin manusia!')}}
+  else{if(t!=='slotP')return bad('Plasmid ditaruh di lingkaran PLASMID di atas.');S.vec=b;if(b==='blank'){render();return bad('pBlank tidak punya tempat sisip, gen kebal antibiotik, dan gen biru. Gen tidak bisa dimasukkan dan hasilnya tidak bisa diseleksi. Ganti dengan pUC19!')}}
+  render();return S.gene==='ins'&&S.vec==='puc'?win('Pilihan tepat! pUC19 punya tempat sisip dan penanda seleksi.'):ok(a==='g'?'Gen siap. Sekarang pilih plasmid.':'Plasmid siap. Sekarang pilih gen.')}
+ if(st===1){
+  if(S.cut)return;const g=t==='gene';sfx('snip');burst(x,y,'✂️');
+  if(b==='BamHI'&&g)return bad('Gen kita tidak punya urutan GGATCC, jadi BamHI tidak bisa memotongnya dan gen tetap utuh.');
+  S[g?'gE':'pE']=b;
+  if(S.pE&&S.gE){
+   if(S.pE==='EcoRI'&&S.gE==='EcoRI'){S.cut=true;return win('EcoRI memotong di GAATTC. Plasmid terbuka, gen terpotong, dan kedua ujung berumbai yang cocok!')}
+   const m=S.pE!==S.gE?'Gunting plasmid dan gen berbeda, jadi umbainya tidak cocok dan tidak bisa menempel.':'HaeIII memotong lurus (ujung tumpul) sehingga tidak ada umbai untuk menempel. Sambungannya sulit dan arahnya bisa terbalik.';
+   S.pE=S.gE=null;render();return bad(m+' Coba lagi!')}
+  render();return ok(`${b} terpasang di ${g?'gen':'plasmid'}. ${b==='BamHI'?'Cek apakah gen punya tempat potongnya.':b==='HaeIII'?'Ujung tumpul. Lanjut ke target satunya.':'Sekarang pasang di target satunya.'}`)}
+ if(st===2){
+  if(a==='pol')return bad('Polimerase menambah huruf (nukleotida) baru, bukan menyambung rangka yang putus. Yang menyambung adalah ligase.');
+  if(a==='ins'){S.ins=true;render();return ok('Potongan gen masuk ke celah! Ujungnya menempel lewat ikatan hidrogen, tetapi rangka masih putus (✂ putus). Tambahkan ligase!','🧩')}
+  if(!S.ins)return bad('Masukkan dulu potongan gen ke plasmid, baru disambung.');
+  S.lig=true;return win('Ligase menyambung rangka DNA. Plasmid kembali melingkar dan membawa gen baru. Perhatikan gen biru kini rusak!')}
+ if(st===3){
+  if(a==='rp'){S.t4=1;render();return ok('Plasmid rekombinan dicampur dengan bakteri.')}
+  if(a==='ice'){if(S.t4<1)return bad('Masukkan dulu plasmid rekombinan ke tabung.');S.t4=2;render();return ok('Dingin membuat DNA menempel di dinding sel.','🧊')}
+  if(a==='heat'){if(S.t4<2)return bad('Dinginkan di es dulu agar DNA menempel di dinding sel.');S.t4=3;render();return ok('Suhu naik mendadak, dinding sel membuka pori, plasmid masuk!','🔥')}
+  if(a==='rec'){if(S.t4<3)return bad('Lakukan heat shock dulu.');S.t4=4;render();return ok('Bakteri pulih dan mulai membuat protein kebal antibiotik. Sekarang pilih cawan media!')}
+  if(a==='ice'||a==='heat'||a==='rec')return;
+  S.media=b;if(b==='amp-xgal')return win('Ampisilin menyeleksi, X-gal membedakan warna. Koloni PUTIH membawa gen baru, BIRU tidak. Ketuk koloni untuk penjelasan!');
+  render();return bad(b==='lb'?'Tanpa antibiotik semua bakteri tumbuh, termasuk yang tidak menerima plasmid. Tidak ada seleksi.':'Hanya bakteri bertransformasi yang tumbuh, tetapi tanpa X-gal kamu tidak bisa membedakan yang membawa gen baru.')}}
+function quiz(){const q=QZ[S.step],last=S.step===3;
+ $('#ov').innerHTML=`<div class="ov"><div class="box"><div style="font-size:40px">🧠</div><b class="text-lg">Cek pemahaman</b><p class="my-2 font-semibold">${q.q}</p>${q.o.map((o,i)=>`<button class="opt" data-qz="${i}">${o}</button>`).join('')}<p id="qf" class="text-sm my-2"></p><button class="btn" id="qn" disabled data-act="${last?'final':'next'}">${last?'Selesai 🎉':'Misi berikutnya ➜'}</button><br><button class="btn sm ghost" style="margin-top:.5rem" data-act="close">👀 Amati hasil dulu</button></div></div>`}
+function final(){S.fin=true;S.view=3;$('#ov').innerHTML='';sfx('win');burst(innerWidth/2,innerHeight/2,'⭐');render();toast('ok','🎉 Semua misi selesai! Amati hasil akhir pada cawan, lalu tekan 🎬 Lanjut untuk melihat produksi insulin.',3500)}
+/* ---------- input ---------- */
+document.addEventListener('click',e=>{
+ const q=e.target.closest('[data-qz]');
+ if(q){const Q=QZ[S.step],ok=+q.dataset.qz===Q.a;$('#qf').innerHTML=`<span style="color:var(--${ok?'grn':'red'})">${ok?'✅ Benar! ':'❌ Belum tepat, coba lagi. '}${ok?Q.e:''}</span>`;if(ok){sfx('ok');S.qok[S.step]=true;renderTray();$('#qn').disabled=false}else sfx('err');return}
+ const a=e.target.closest('[data-act]');if(!a)return;const v=a.dataset.act;
+ if(v==='reset'){$('#ov').innerHTML='';init()}
+ if(v==='next'){$('#ov').innerHTML='';S.step++;S.view=S.step;S.sel=null;render();enter()}
+ if(v==='final')final();
+ if(v==='mis')mission();if(v==='hint')hintm();if(v==='prod'){S.view=4;S.pp=0;S.sel=null;play();render()}if(v==='pplay'){if(S.auto)stopAuto();else{if(S.pp>=4)S.pp=0;play()}render()}if(v==='pprev'||v==='pnext'){stopAuto();S.pp+=v==='pnext'?1:-1;render()}if(v==='close')$('#ov').innerHTML='';if(v==='quiz')quiz();if(v==='ask')ask();if(v==='view'){S.view=+a.dataset.v;S.sel=null;if(S.view===4){S.pp=0;play()}render()}if(v==='back'){S.view=S.step;render()}
+ if(v==='snd'){snd=!snd;if(AC)mg.gain.value=snd?1:0;$('#snd').textContent=snd?'🔊':'🔇'}
+ if(v==='start'){$('#ov').innerHTML='';A();music();enter()}});
+$('#toast').onclick=()=>$('#toast').classList.add('hidden');
+const tgt=(x,y)=>{const el=document.elementsFromPoint(x,y).find(n=>n.dataset&&n.dataset.drop);return el?el.dataset.drop:null};
+$('#stage').addEventListener('click',e=>{
+ if(S.sel){const t=tgt(e.clientX,e.clientY),k=S.sel;if(t){S.sel=null;act(k,t,e.clientX,e.clientY)}else toast('hint','👆 Ketuk area bergaris putus yang berkedip.');return}
+ const i=e.target.closest('[data-info]');if(i)info(i.dataset.info)});
+let D=null;
+$('#tray').addEventListener('pointerdown',e=>{const it=e.target.closest('.item');if(!it)return;e.preventDefault();A();sfx('pick');D={k:it.dataset.k,em:it.querySelector('.em').textContent,sx:e.clientX,sy:e.clientY,mv:false,g:null}});
+window.addEventListener('pointermove',e=>{if(!D)return;
+ if(!D.mv&&Math.hypot(e.clientX-D.sx,e.clientY-D.sy)>8){D.mv=true;D.g=document.createElement('div');D.g.className='ghost';D.g.textContent=D.em;document.body.appendChild(D.g);document.body.classList.add('dragging');$('#stage').classList.add('selmode')}
+ if(D.g)D.g.style.transform=`translate(${e.clientX}px,${e.clientY}px) translate(-50%,-70%)`});
+window.addEventListener('pointerup',e=>{if(!D)return;const d=D;D=null;if(d.g)d.g.remove();document.body.classList.remove('dragging');
+ if(d.mv){$('#stage').classList.toggle('selmode',!!S.sel);const t=tgt(e.clientX,e.clientY);t?act(d.k,t,e.clientX,e.clientY):(sfx('err'),toast('hint','Lepaskan di area bergaris putus yang berkedip.'))}
+ else{S.sel=S.sel===d.k?null:d.k;renderTray();if(S.sel)toast('hint','👆 Sekarang ketuk area bergaris putus di layar (atau seret langsung).')}});
+window.addEventListener('pointercancel',()=>{if(D&&D.g)D.g.remove();D=null;document.body.classList.remove('dragging')});
+init();
+$('#ov').innerHTML=`<div class="ov"><div class="box"><b class="text-xl" style="color:var(--neon)">Simulasi Teknik DNA Rekombinan</b>
+<p class="text-sm my-2">Pada simulasi ini kamu akan <b>membuat insulin rekombinan untuk manusia</b>, salah satu produk dan penerapan prinsip <b>bioteknologi modern</b>.</p>
+<svg viewBox="0 0 260 132" style="width:100%;max-width:260px;margin:0 auto"><rect x="34" y="34" width="52" height="76" rx="9" style="fill:#dff3ff;stroke:var(--bd)" stroke-width="3"/><rect x="42" y="18" width="36" height="18" rx="4" style="fill:var(--red)"/><rect x="38" y="58" width="44" height="30" rx="4" style="fill:#fff"/><text x="60" y="77" text-anchor="middle" style="font-size:9px;font-weight:700;fill:#0f2342">INSULIN</text><line x1="104" y1="72" x2="88" y2="72" style="stroke:var(--mut)" stroke-width="2"/><rect x="104" y="58" width="104" height="28" rx="12" style="fill:var(--neon)"/><rect x="122" y="64" width="34" height="16" rx="3" style="fill:#fff"/><rect x="208" y="63" width="26" height="18" rx="5" style="fill:var(--grn)"/><text x="130" y="126" text-anchor="middle" class="t">Insulin rekombinan manusia</text></svg>
+<p class="text-sm"><b>Produk akhir yang akan kamu buat:</b> insulin rekombinan manusia, hormon pengatur gula darah yang dipakai penderita diabetes.</p>
+<p style="margin:.6rem 0;font-size:1.3rem">🧬 → ⭕ → 🦠 → 💉</p>
+<p class="text-sm" style="border:2px solid var(--amb);border-radius:12px;padding:.5rem;background:color-mix(in srgb,var(--amb) 12%,var(--panel))">📌 <b>Ingat:</b> salah satu contoh bioteknologi modern adalah memproduksi insulin rekombinan. Ini merupakan salah satu aplikasi <b>rekayasa genetika</b> yang dilakukan menggunakan <b>teknik DNA rekombinan</b>.</p>
+<p class="text-sm my-2">👆 <b>Seret</b> bahan dari bawah ke layar<br>🔍 <b>Ketuk</b> gambar untuk penjelasan<br>🎧 Aktifkan suara untuk musik</p>
+<button class="btn" data-act="start">▶ Mulai</button></div></div>`;
+</script></body></html>
